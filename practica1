@@ -1,0 +1,158 @@
+practica 1
+public class AlgebraVectorial {
+
+    private double ax, ay, az;
+    private double bx, by, bz;
+
+    // Constructor vacío
+    public AlgebraVectorial() {
+        this.ax = this.ay = this.az = 0;
+        this.bx = this.by = this.bz = 0;
+    }
+
+    // Sobrecarga: vector A solamente
+    public AlgebraVectorial(double ax, double ay, double az) {
+        this.ax = ax;
+        this.ay = ay;
+        this.az = az;
+    }
+
+    // Sobrecarga: vector A y B
+    public AlgebraVectorial(double ax, double ay, double az,
+                            double bx, double by, double bz) {
+        this.ax = ax; this.ay = ay; this.az = az;
+        this.bx = bx; this.by = by; this.bz = bz;
+    }
+
+    // ------------------ Métodos auxiliares -----------------
+
+    private double magnitudA() {
+        return Math.sqrt(ax*ax + ay*ay + az*az);
+    }
+
+    private double magnitudB() {
+        return Math.sqrt(bx*bx + by*by + bz*bz);
+    }
+
+    private double norma(double x, double y, double z) {
+        return Math.sqrt(x*x + y*y + z*z);
+    }
+
+    private double productoPunto() {
+        return ax*bx + ay*by + az*bz;
+    }
+
+    private double[] suma() {
+        return new double[] { ax + bx, ay + by, az + bz };
+    }
+
+    private double[] restaAB() {
+        return new double[] { ax - bx, ay - by, az - bz };
+    }
+
+    private double[] restaBA() {
+        return new double[] { bx - ax, by - ay, bz - az };
+    }
+
+    private double[] productoCruz() {
+        return new double[] {
+            ay*bz - az*by,
+            az*bx - ax*bz,
+            ax*by - ay*bx
+        };
+    }
+
+    // ------------------ MÉTODOS PERPENDICULARES ------------------
+
+    // a) |a + b| = |a - b|
+    public boolean perpendicular() {
+        double[] suma = suma();
+        double[] resta = restaAB();
+        return Math.abs(norma(suma[0], suma[1], suma[2]) -
+                        norma(resta[0], resta[1], resta[2])) < 0.0001;
+    }
+
+    // b) |a - b| = |b - a|
+    public boolean perpendicular(double dummy) {
+        double[] ab = restaAB();
+        double[] ba = restaBA();
+        return Math.abs(norma(ab[0], ab[1], ab[2]) -
+                        norma(ba[0], ba[1], ba[2])) < 0.0001;
+    }
+
+    // c) Producto punto = 0
+    public boolean perpendicular(boolean usarProductoPunto) {
+        return Math.abs(productoPunto()) < 0.0001;
+    }
+
+    // d) |a + b|^2 = |a|^2 + |b|^2
+    public boolean perpendicular(int dummy) {
+        double[] add = suma();
+        return Math.abs(
+            Math.pow(norma(add[0], add[1], add[2]), 2)
+            - (Math.pow(magnitudA(), 2) + Math.pow(magnitudB(), 2))
+        ) < 0.0001;
+    }
+
+    // ------------------ MÉTODOS PARA PARALELISMO ------------------
+
+    // e) a = r b  (proporcionales)
+    public boolean paralelo() {
+        try {
+            double r1 = ax / bx;
+            double r2 = ay / by;
+            double r3 = az / bz;
+            return Math.abs(r1 - r2) < 0.0001 && Math.abs(r2 - r3) < 0.0001;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // f) a × b = 0
+    public boolean paralelo(int dummy1, int dummy2) {
+        double[] cruz = productoCruz();
+        return Math.abs(cruz[0]) < 0.0001 &&
+               Math.abs(cruz[1]) < 0.0001 &&
+               Math.abs(cruz[2]) < 0.0001;
+    }
+
+    // ------------------ PROYECCIÓN ------------------
+
+    // g) Proyección de a sobre b
+    public double[] proyeccion() {
+        double prod = productoPunto();
+        double magB2 = magnitudB() * magnitudB();
+
+        return new double[]{
+            (prod / magB2) * bx,
+            (prod / magB2) * by,
+            (prod / magB2) * bz
+        };
+    }
+
+    // ------------------ COMPONENTE ------------------
+
+    // h) Componente de a en b
+    public double componente() {
+        return productoPunto() / magnitudB();
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+
+        AlgebraVectorial av = new AlgebraVectorial(1, 2, 3, 4, -8, 4);
+
+        System.out.println("Perpendicular (a+b = a-b): " + av.perpendicular());
+        System.out.println("Perpendicular (a-b = b-a): " + av.perpendicular(0.0));
+        System.out.println("Perpendicular (a·b = 0): " + av.perpendicular(true));
+        System.out.println("Perpendicular (|a+b|^2 = ...): " + av.perpendicular(1));
+
+        System.out.println("Paralelo (a = rb): " + av.paralelo());
+        System.out.println("Paralelo (a × b = 0): " + av.paralelo(1, 1));
+
+        double[] proy = av.proyeccion();
+        System.out.println("Proyección: (" + proy[0] + ", " + proy[1] + ", " + proy[2] + ")");
+
+        System.out.println("Componente de a en b: " + av.componente());
+    }
+}
